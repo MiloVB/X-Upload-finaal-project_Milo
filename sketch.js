@@ -140,3 +140,143 @@ async function init() {
         isListening = false;
     }
 }
+
+function checkAnswer(predicted){
+
+    const correctBrand =
+        brands[currentBrand];
+
+    if(predicted === correctBrand.className){
+
+        labelContainer.innerHTML =
+            "✅ Correct! You said: " + predicted;
+
+        score++;
+
+        scoreText.innerHTML =
+            "Score: " + score;
+
+        saveWeeklyHighScore();
+
+        currentBrand++;
+
+        if(currentBrand >= brands.length){
+
+            labelContainer.innerHTML =
+                "🏁 Game Finished! Final Score: " + score;
+
+            recognizer.stopListening();
+
+            isListening = false;
+
+            return;
+        }
+
+        setTimeout(() => {
+
+            loadBrand();
+
+            labelContainer.innerHTML =
+                "🎧 Listening...";
+
+        }, 1500);
+
+    } else {
+
+        labelContainer.innerHTML =
+            "❌ Try Again!";
+    }
+}
+
+function getCurrentWeek(){
+
+    const now = new Date();
+
+    const firstDay =
+        new Date(now.getFullYear(), 0, 1);
+
+    const pastDays =
+        Math.floor((now - firstDay) / 86400000);
+
+    return Math.ceil(
+        (pastDays + firstDay.getDay() + 1) / 7
+    );
+}
+
+
+function saveWeeklyHighScore(){
+
+    const currentWeek = getCurrentWeek();
+
+    const savedWeek =
+        localStorage.getItem("scoreWeek");
+
+    let bestScore =
+        parseInt(
+            localStorage.getItem("bestScore")
+        ) || 0;
+
+    if(savedWeek != currentWeek){
+
+        localStorage.setItem(
+            "scoreWeek",
+            currentWeek
+        );
+
+        localStorage.setItem(
+            "bestScore",
+            0
+        );
+
+        bestScore = 0;
+    }
+
+    if(score > bestScore){
+
+        localStorage.setItem(
+            "bestScore",
+            score
+        );
+
+        bestScore = score;
+    }
+
+    bestScoreText.innerHTML =
+        "Best Score This Week: " + bestScore;
+}
+
+// =====================================
+// LOAD HIGH SCORE
+// =====================================
+
+function loadWeeklyHighScore(){
+
+    const currentWeek =
+        getCurrentWeek();
+
+    const savedWeek =
+        localStorage.getItem("scoreWeek");
+
+    if(savedWeek != currentWeek){
+
+        localStorage.setItem(
+            "scoreWeek",
+            currentWeek
+        );
+
+        localStorage.setItem(
+            "bestScore",
+            0
+        );
+    }
+
+    const bestScore =
+        localStorage.getItem("bestScore") || 0;
+
+    bestScoreText.innerHTML =
+        "Best Score This Week: " + bestScore;
+}
+
+
+loadBrand();
+loadWeeklyHighScore();
